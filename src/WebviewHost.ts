@@ -139,6 +139,18 @@ export class WebviewHost {
         vscode.window.setStatusBarMessage('$(check) OTP 已複製到剪貼簿', 2000);
         break;
       }
+
+      case 'copySecretForAccount': {
+        const { id } = message.payload as { id: string };
+        const account = await this._storage.loadAccountWithSecret(id);
+        if (!account) {
+          this._post({ command: 'error', payload: { message: '找不到帳號' } });
+          return;
+        }
+        await vscode.env.clipboard.writeText(account.secret);
+        vscode.window.setStatusBarMessage('$(key) Secret Key 已複製到剪貼簿', 2000);
+        break;
+      }
     }
   }
 
@@ -322,7 +334,10 @@ export function getWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri
               </svg>
             </button>
           </div>
-          <span class="hint">掃描 QR Code 後取得的金鑰</span>
+          <div class="secret-hint-row">
+            <span class="hint">掃描 QR Code 後取得的金鑰</span>
+            <button type="button" class="btn-link" id="btn-copy-secret">複製 Secret Key</button>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">

@@ -30,6 +30,7 @@ const inputSecret    = document.getElementById('input-secret');
 const inputDigits    = document.getElementById('input-digits');
 const inputPeriod    = document.getElementById('input-period');
 const formError      = document.getElementById('form-error');
+const btnCopySecret  = document.getElementById('btn-copy-secret');
 
 const deleteOverlay      = document.getElementById('delete-overlay');
 const deleteConfirmText  = document.getElementById('delete-confirm-text');
@@ -147,6 +148,15 @@ function buildCard(account) {
   const actions = document.createElement('div');
   actions.className = 'account-actions';
 
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'btn-action';
+  copyBtn.title = '複製 OTP';
+  copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+  copyBtn.addEventListener('click', (e) => { e.stopPropagation(); copyAccountOTP(account, card); });
+
   const editBtn = document.createElement('button');
   editBtn.className = 'btn-action';
   editBtn.title = '編輯';
@@ -167,6 +177,7 @@ function buildCard(account) {
   </svg>`;
   deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); openDeleteModal(account.id); });
 
+  actions.appendChild(copyBtn);
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);
 
@@ -175,17 +186,19 @@ function buildCard(account) {
   card.appendChild(otpContainer);
   card.appendChild(actions);
 
-  // 點擊複製 OTP（傳給 extension 處理剪貼簿）
-  card.addEventListener('click', () => {
-    const rawOtp = account.otp;
-    if (!rawOtp || rawOtp === '------') { showToast('無法產生 OTP'); return; }
-    vscode.postMessage({ command: 'copyOTP', payload: { otp: rawOtp } });
-    card.classList.add('copied');
-    setTimeout(() => card.classList.remove('copied'), 1500);
-    showToast('已複製到剪貼簿！');
-  });
+  // 點擊卡片任意處也可複製 OTP
+  card.addEventListener('click', () => copyAccountOTP(account, card));
 
   return card;
+}
+
+function copyAccountOTP(account, card) {
+  const rawOtp = account.otp;
+  if (!rawOtp || rawOtp === '------') { showToast('無法產生 OTP'); return; }
+  vscode.postMessage({ command: 'copyOTP', payload: { otp: rawOtp } });
+  card.classList.add('copied');
+  setTimeout(() => card.classList.remove('copied'), 1500);
+  showToast('已複製到剪貼簿！');
 }
 
 function formatOTP(otp, digits) {
@@ -252,6 +265,7 @@ function openAddModal() {
   formError.textContent = '';
   inputSecret.type = 'password';
   updateEyeIcon(false);
+  btnCopySecret.style.display = 'none';
   resetQrImport();
   modalOverlay.classList.add('active');
   setTimeout(() => inputIssuer.focus(), 50);
@@ -270,6 +284,7 @@ function openEditModal(id) {
   formError.textContent = '';
   inputSecret.type = 'password';
   updateEyeIcon(false);
+  btnCopySecret.style.display = 'inline-block';
   resetQrImport();
   modalOverlay.classList.add('active');
   setTimeout(() => inputIssuer.focus(), 50);
@@ -689,6 +704,12 @@ function bindEvents() {
     const isPassword = inputSecret.type === 'password';
     inputSecret.type = isPassword ? 'text' : 'password';
     updateEyeIcon(isPassword);
+  });
+
+  btnCopySecret.addEventListener('click', () => {
+    if (!editingId) { return; }
+    vscode.postMessage({ command: 'copySecretForAccount', payload: { id: editingId } });
+    showToast('已複製到剪貼簿！');
   });
 
   document.getElementById('btn-qr-upload').addEventListener('click', () => qrFileInput.click());
