@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "2FA Authenticator",
+  "version": "1.0.0",
+  "description": "安全的 TOTP 兩步驟驗證管理器，支援 Google Authenticator 相容格式",
+  "permissions": [
+    "storage",
+    "clipboardWrite",
+    "alarms"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "name": "vscode-2fa-authenticator",
+  "displayName": "2FA Authenticator",
+  "description": "TOTP 兩步驟驗證管理器 - 在 VS Code 中管理您的 2FA 帳號",
+  "version": "1.0.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "2fa",
+    "totp",
+    "authenticator",
+    "security",
+    "otp"
+  ],
+  "icon": "icons/icon128.png",
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "2fa.openPanel",
+        "title": "開啟 2FA 驗證器（獨立分頁）",
+        "category": "2FA",
+        "icon": "$(shield)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "2fa-sidebar",
+          "title": "2FA 驗證器",
+          "icon": "icons/activitybar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "2fa-sidebar": [
+        {
+          "type": "webview",
+          "id": "2fa.sidebarView",
+          "name": "2FA 驗證器",
+          "icon": "icons/activitybar-icon.svg"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [],
+      "view/title": [
+        {
+          "command": "2fa.openPanel",
+          "when": "view == 2fa.sidebarView",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "2fa.openPanel"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "2fa.openPanel",
+        "key": "ctrl+shift+alt+t",
+        "mac": "cmd+shift+alt+t"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}
